@@ -1,35 +1,52 @@
-import { useEffect, useState } from 'react'
+import { useReducer, useState } from 'react'
 
 const pinkRGB = `rgb(236, 72, 153)`
 
+const countReducer = (setCurrentColor) => (count, action) => {
+  let newCount
+  switch(action.type) {
+    case 'increment': {
+      newCount = count + 1
+      break
+    }
+    case 'decrement': {
+      newCount = count - 1
+      break
+    }
+    case 'reset': {
+      newCount = 0
+      break
+    }
+    default: {
+      throw new Error('Invalid action type in countReducer')
+    }
+  }
+  // I refactored in the useEffect to this reducer.
+  // This doesn't seem like a good approach, but it was fun.
+  if(newCount === 0) {
+    setCurrentColor(pinkRGB)
+  } else if (newCount > 0) {
+    setCurrentColor(`rgb(52, 211, 153)`)
+  } else if (newCount < 0) {
+    setCurrentColor(`rgb(239, 68, 68)`)
+  }
+  return newCount
+}
+
 export default function Counter() {
-  const [count, setCount] = useState(0)
   const [currentColor, setCurrentColor] = useState(pinkRGB)
-
-  useEffect(() => {
-    if (count === 0) {
-      setCurrentColor(pinkRGB)
-    }
-
-    if (count > 0) {
-      setCurrentColor(`rgb(52, 211, 153)`)
-    }
-
-    if (count < 0) {
-      setCurrentColor(`rgb(239, 68, 68)`)
-    }
-  }, [count])
+  const [count, countDispatch] = useReducer(countReducer(setCurrentColor), 0)
 
   const increment = () => {
-    setCount((prevState) => prevState + 1)
+    countDispatch({type: 'increment'})
   }
 
   const decrement = () => {
-    setCount((prevState) => prevState - 1)
+    countDispatch({type: 'decrement'})
   }
 
   const reset = () => {
-    setCount(0)
+    countDispatch({type: 'reset'})
   }
 
   return (
